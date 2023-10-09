@@ -1,4 +1,4 @@
-import { AppBar, Grid, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Grid, Toolbar, Typography } from '@mui/material';
 import logo from './logo.svg';
 import { Map } from './Map';
 
@@ -9,14 +9,16 @@ const App = () => {
     direction="column"
     alignItems="center"
     justifyContent="center">
-    <AppBar>
+    <AppBar position="sticky">
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Wetter App
         </Typography>
       </Toolbar>
     </AppBar>
-    <Map />
+    <Box sx={{ m: 0, p: 0 }}>
+      <Map />
+    </Box>
   </Grid>
 }
 
