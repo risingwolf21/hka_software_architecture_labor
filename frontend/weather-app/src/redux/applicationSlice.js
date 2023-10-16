@@ -7,8 +7,7 @@ export const applicationReducer = createSlice({
     },
     reducers: {
         onStationsChanged: (state, action) => {
-            console.log(action.payload)
-            state.stations = action.payload
+            state.stations = JSON.parse(action.payload)
         }
     }
 });

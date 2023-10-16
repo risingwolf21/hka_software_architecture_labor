@@ -5,6 +5,8 @@ import { useEffect } from 'react';
 import raw from './stations/stations.txt';
 import { useDispatch } from 'react-redux';
 import { onStationsChanged } from './redux/applicationSlice';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { WeatherInformation } from './WeatherInformation';
 
 const App = () => {
 
@@ -17,7 +19,7 @@ const App = () => {
         const lines = data.split('\n');
 
         // Extract the header from the first line
-        const headers = lines[0].split(/\s+/);
+        const headers = lines[1].split(/\s+/);
 
         // Initialize an array to store station data
         const stationData = [];
@@ -36,11 +38,10 @@ const App = () => {
           stationData.push(station);
         }
 
-        const jsonData = JSON.stringify(stationData, null, 2);
+        const jsonData = JSON.stringify(stationData.slice(1), null, 2);
 
         // Print the JSON data
-        console.log(jsonData);
-        dispatch(onStationsChanged(stationData))
+        dispatch(onStationsChanged(jsonData))
       });
   })
 
@@ -50,15 +51,14 @@ const App = () => {
     direction="column"
     alignItems="center"
     justifyContent="center">
-    <AppBar position="sticky">
-      <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Wetter App
-        </Typography>
-      </Toolbar>
-    </AppBar>
     <Box sx={{ m: 0, p: 0 }}>
-      <Map />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate replace to={"/map"} />} />
+          <Route path="/map" element={<Map />} />
+          <Route path="/station/:id" element={<WeatherInformation />} />
+        </Routes>
+      </BrowserRouter>
     </Box>
   </Grid>
 }

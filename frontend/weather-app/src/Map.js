@@ -1,36 +1,10 @@
-import { Box, Grid, List, ListItem, ListItemText } from "@mui/material"
-import { Icon } from "leaflet";
+import { AppBar, Avatar, Box, Grid, List, ListItem, ListItemAvatar, ListItemText, Menu, MenuItem, Paper, Toolbar } from "@mui/material"
 import { useState } from "react";
 import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 import { useSelector } from "react-redux";
-
-
-const LocationMarker = () => {
-    const [position, setPosition] = useState({ latitude: 0, longitude: 0 })
-
-    const map = useMapEvents({
-        click() {
-            map.locate()
-        },
-        locationfound(e) {
-            const { lat, lng } = e.latlng;
-            console.log(e.latlng)
-            setPosition({
-                latitude: lat,
-                longitude: lng,
-            })
-            map.flyTo(e.latlng, map.getZoom())
-        },
-    });
-
-    return (
-        position.latitude !== 0 ?
-            <Marker
-                position={[position.latitude, position.longitude]}
-                interactive={false} />
-            : null
-    )
-}
+import { Search, SearchIconWrapper, StyledInputBase } from "./SearchBar";
+import SearchIcon from "@mui/icons-material/Search";
+import { useNavigate } from "react-router-dom";
 
 const MapEvents = ({ stations, handleShownStations }) => {
 
@@ -41,7 +15,8 @@ const MapEvents = ({ stations, handleShownStations }) => {
     }
 
     const findNearestStation = (lat, lng) => {
-        let stationWithDistance = stations.map(x => { return { ...x, distance: distance(lat, lng, x.geoBreite, x.geoLaenge) } });
+        console.log(stations[0])
+        let stationWithDistance = stations.map(x => { return { ...x, distance: distance(lat, lng, x.BR_HIGH, x.LA_HIGH) } });
         stationWithDistance.sort((a, b) => a.distance - b.distance);
         setPositions(stationWithDistance.slice(0, 10));
         handleShownStations(stationWithDistance.slice(0, 10))
@@ -52,7 +27,7 @@ const MapEvents = ({ stations, handleShownStations }) => {
             findNearestStation(e.latlng.lat, e.latlng.lng);
         },
     });
-    return positions && positions.map(x => <Marker position={[x.geoBreite, x.geoLaenge]}
+    return positions && positions.map(x => <Marker position={[x.BR_HIGH, x.LA_HIGH]}
         eventHandlers={{
             click: (e) => {
                 console.log('marker clicked', e)
@@ -60,27 +35,70 @@ const MapEvents = ({ stations, handleShownStations }) => {
         }} />)
 }
 
+const AllStations = ({ stations }) => {
+
+    return stations && stations.filter(x => x.ENDE === "").slice(0, 1000).map(x => <Marker position={[x.BR_HIGH, x.LA_HIGH]} />)
+}
+
 export const Map = () => {
 
+    const navigate = useNavigate();
+    const [searchString, setSearchString] = useState("");
     const [selectedPos, setSelectedPos] = useState([49.0226481, 8.416547971872856]);
     const [selectedStations, setSelectedStations] = useState([]);
     const { stations } = useSelector(state => state.application);
 
+    const keyPress = (e) => {
+        if (e.keyCode === 13) {
+
+        }
+    }
+
     return <Grid>
+        <AppBar position="sticky">
+            <Toolbar>
+                <Search>
+                    <SearchIconWrapper>
+                        <SearchIcon />
+                    </SearchIconWrapper>
+                    <StyledInputBase
+                        onKeyDown={keyPress}
+                        placeholder="Search…"
+                        onChange={(e) => setSearchString(e.target.value)}
+                        inputProps={{ 'aria-label': 'search' }}
+                    />
+                </Search>
+            </Toolbar>
+        </AppBar>
         <MapContainer
             style={{ width: "100vw", height: "95vh" }}
             center={selectedPos}
             zoom={10}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            <MapEvents stations={stations} handleShownStations={(x) => setSelectedStations(x)} />
+            <AllStations stations={stations} />
         </MapContainer>
 
-        <List sx={{ position: "absolute", left: 0, top: 56, bottom: 0, width: "20%" }}>
-            {
-                selectedStations && selectedStations.map((x, index) => <ListItem key={index}>
-                    <ListItemText primary={x.Stationsname} secondary={x.geoBreite + ", " + x.geoLaenge} />
-                </ListItem>)
-            }
-        </List>
+        <Paper sx={{
+            position: "absolute",
+            left: 0,
+            top: 64,
+            bottom: 0,
+            m: 2,
+            width: "250px",
+            zIndex: 9999
+        }}>
+            <List sx={{ overflow: "auto" }}>
+                {
+                    selectedStations && selectedStations.map(x => <ListItem onClick={() => navigate("/station/" + x.STAT_ID)}>
+                        <ListItemAvatar>
+                            <Avatar>
+                                {x.BL}
+                            </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText primary={x.STAT_NAME} secondary={x.BR_HIGH + ", " + x.LA_HIGH} />
+                    </ListItem>)
+                }
+            </List>
+        </Paper>
     </Grid>
 }
