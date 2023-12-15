@@ -1,10 +1,10 @@
 {
 	"folders": [
 		{
-			"path": "frontend/web-app"
+			"path": "backend/api"
 		},
 		{
-			"path": "backend/api"
+			"path": "frontend/web-app"
 		}
 	],
 	"settings": {}

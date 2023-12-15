@@ -8,9 +8,9 @@ services:
             - 5000:5000
         extra_hosts:
             - "host.docker.internal:host-gateway"
-    # app:
-    #     build:
-    #         context: ./frontend/weather-app
-    #         dockerfile: Dockerfile
-    #     ports:
-    #         - 4200:80
+    web-app:
+        build:
+            context: ./frontend/web-app
+            dockerfile: Dockerfile
+        ports:
+            - 3000:3000
