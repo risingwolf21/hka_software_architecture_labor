@@ -1,5 +1,7 @@
 # hka_software_architecture_labor
 
+![img](architecture.svg)
+
 ## Local Setup
 
 For local development, you can use the docker compose environment. It serves
