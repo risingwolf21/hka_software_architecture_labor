@@ -1,23 +1,14 @@
-# Use an official Node.js runtime as the base image
-FROM node:20-alpine AS builder
+# Base image
+FROM node:16-alpine
 
-# Set the working directory in the container
+# Create app directory
 WORKDIR /usr/src/app
 
-# Copy Angular context
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY . .
 
-# Install the app's dependencies
-RUN npm install
+# Install app dependencies
+RUN npm install --force
 
-# Build
-RUN npm run build
-
-# Use nginx from here on
-FROM nginx:alpine
-
-# Copy files to nginx folder
-COPY --from=builder /usr/src/app/dist/weather-app /usr/share/nginx/html
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Start the server using the production build
+CMD [ "npm", "run", "start" ]
