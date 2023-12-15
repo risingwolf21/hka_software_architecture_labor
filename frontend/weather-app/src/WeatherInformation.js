@@ -10,7 +10,7 @@ export const WeatherInformation = () => {
     useEffect(() => {
         if (!id)
             return;
-        fetch("https://dwd.api.proxy.bund.dev/v30/stationOverviewExtended?stationIds=" + id, {
+        fetch("https://localhost:5000/bund/v30/stationOverviewExtended?stationIds=" + id, {
             method: "GET",
             mode: "no-cors",
             headers: {

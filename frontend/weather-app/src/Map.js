@@ -75,7 +75,7 @@ export const Map = () => {
             center={selectedPos}
             zoom={10}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            <AllStations stations={stations} />
+            <AllStations stations={stations} handleShownStations={keyPress} />
         </MapContainer>
 
         <Paper sx={{
