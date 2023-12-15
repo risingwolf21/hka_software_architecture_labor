@@ -2,6 +2,12 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "frontend/web-app"
+		},
+		{
+			"path": "backend/api"
 		}
 	],
 	"settings": {}
