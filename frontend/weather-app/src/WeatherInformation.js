@@ -15,7 +15,6 @@ export const WeatherInformation = () => {
             return;
         fetch("http://localhost:5000/bund/v30/stationOverviewExtended?stationIds=" + id, {
             method: "GET",
-            mode: "no-cors",
             headers: {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",
@@ -35,7 +34,6 @@ export const WeatherInformation = () => {
             .catch(err => console.error(err));
         fetch(`http://localhost:5000/openweather/data/2.5/weather?lat=${lat}&lon=${lon}&appid=cb5422e7b5f85385d76e7b4b2d569a54`, {
             method: "GET",
-            mode: "no-cors",
             headers: {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*"
