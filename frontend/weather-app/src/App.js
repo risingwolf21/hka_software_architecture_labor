@@ -56,7 +56,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Navigate replace to={"/map"} />} />
           <Route path="/map" element={<Map />} />
-          <Route path="/station/:id" element={<WeatherInformation />} />
+          <Route path="/station" element={<WeatherInformation />} />
         </Routes>
       </BrowserRouter>
     </Box>

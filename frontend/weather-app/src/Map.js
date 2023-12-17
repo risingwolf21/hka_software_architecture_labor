@@ -75,7 +75,7 @@ export const Map = () => {
             center={selectedPos}
             zoom={10}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            <AllStations stations={stations} />
+            <MapEvents stations={stations} handleShownStations={setSelectedStations} />
         </MapContainer>
 
         <Paper sx={{
@@ -89,7 +89,8 @@ export const Map = () => {
         }}>
             <List sx={{ overflow: "auto" }}>
                 {
-                    selectedStations && selectedStations.map(x => <ListItem onClick={() => navigate("/station/" + x.STAT_ID)}>
+                    selectedStations && selectedStations.map(x => <ListItem onClick={() =>
+                        navigate("/station", { state: { id: x.STAT_ID, lat: x.BR_HIGH, lon: x.LA_HIGH } })}>
                         <ListItemAvatar>
                             <Avatar>
                                 {x.BL}
