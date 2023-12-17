@@ -14,4 +14,4 @@ export const applicationReducer = createSlice({
 
 export const { onStationsChanged } = applicationReducer.actions;
 
-export default applicationReducer.reducer
+export default applicationReducer.reducer;
