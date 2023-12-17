@@ -1,0 +1,16 @@
+version: '3.6'
+services:
+    api:
+        build:
+            context: ./backend/api
+            dockerfile: Dockerfile
+        ports:
+            - 5000:5000
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+    weather-app:
+        build:
+            context: ./frontend/weather-app
+            dockerfile: Dockerfile
+        ports:
+            - 3000:3000

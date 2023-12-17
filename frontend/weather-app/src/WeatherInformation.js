@@ -13,7 +13,19 @@ export const WeatherInformation = () => {
     useEffect(() => {
         if (!id)
             return;
-        try {
+        fetch("https://localhost:5000/bund/v30/stationOverviewExtended?stationIds=" + id, {
+            method: "GET",
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                setData(data);
+            });
+      try {
             // cb5422e7b5f85385d76e7b4b2d569a54
 
             // curl - X 'GET' \
