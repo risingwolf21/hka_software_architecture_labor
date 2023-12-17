@@ -13,7 +13,7 @@ export const WeatherInformation = () => {
     useEffect(() => {
         if (!id)
             return;
-        fetch("https://localhost:5000/bund/v30/stationOverviewExtended?stationIds=" + id, {
+        fetch("http://localhost:5000/bund/v30/stationOverviewExtended?stationIds=" + id, {
             method: "GET",
             mode: "no-cors",
             headers: {
@@ -21,32 +21,37 @@ export const WeatherInformation = () => {
                 "Access-Control-Allow-Origin": "*",
             }
         })
-            .then(res => res.json())
+            .then(resp => {
+                console.log(resp)
+                if (!resp.ok) {
+                    throw `Server error: [${JSON.stringify(resp)}] [${resp.statusText}] [${resp.url}]`;
+                }
+                return resp.json()
+            })
             .then(data => {
                 setData(data);
-            });
-      try {
-            // cb5422e7b5f85385d76e7b4b2d569a54
-
-            // curl - X 'GET' \
-            // 'https://dwd.api.proxy.bund.dev/v30/stationOverviewExtended?stationIds=10865,G005' \
-            // -H 'accept: application/json'
-            fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&appid=cb5422e7b5f85385d76e7b4b2d569a54`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json"
-                }
+                console.log(data)
             })
-                .then(res => res.json())
-                .then(data => {
-                    setData(data);
-                })
-                .catch(e => {
-                    console.log(e)
-                });
-        } catch (e) {
-            console.error(e)
-        }
+            .catch(err => console.error(err));
+        fetch(`http://localhost:5000/openweather/data/2.5/weather?lat=${lat}&lon=${lon}&appid=cb5422e7b5f85385d76e7b4b2d569a54`, {
+            method: "GET",
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
+            }
+        })
+            .then(resp => {
+                if (!resp.ok) {
+                    throw `Server error: [${JSON.stringify(resp)}] [${resp.statusText}] [${resp.url}]`;
+                }
+                return resp.json()
+            })
+            .then(data => {
+                setData(data);
+                console.log(data);
+            })
+            .catch(err => console.error(err));
     }, [id]);
 
 
