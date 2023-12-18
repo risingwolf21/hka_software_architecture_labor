@@ -39,7 +39,7 @@ export const Map = () => {
     return <Grid>
         <AppBar position="sticky">
             <Toolbar>
-                <Search>
+                {/* <Search>
                     <SearchIconWrapper>
                         <SearchIcon />
                     </SearchIconWrapper>
@@ -49,7 +49,7 @@ export const Map = () => {
                         onChange={(e) => setSearchString(e.target.value)}
                         inputProps={{ 'aria-label': 'search' }}
                     />
-                </Search>
+                </Search> */}
             </Toolbar>
         </AppBar>
         <MapContainer

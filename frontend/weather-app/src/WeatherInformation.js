@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import "moment/locale/de";
+import { North, South, SouthEast, East, West, NorthWest, NorthEast, SouthWest } from '@mui/icons-material';
 import moment from 'moment';
 moment.locale("de");
 
@@ -29,7 +30,6 @@ export const WeatherInformation = () => {
         if (response.ok) {
             var data = await response.json();
             setData(data);
-            console.log(data)
         }
 
         var dailyResponse = await fetch(`http://localhost:5000/openweather/data/2.5/forecast/daily?lat=${lat}&lon=${lon}&appid=cb5422e7b5f85385d76e7b4b2d569a54&lang=DE&units=metric&cnt=16`, {
@@ -43,6 +43,19 @@ export const WeatherInformation = () => {
             var dailyData = await dailyResponse.json();
             setDailyData(dailyData);
         }
+
+        var hourlyResponse = await fetch(`http://localhost:5000/openweatherpro/data/2.5/forecast/hourly?lat=${lat}&lon=${lon}&appid=cb5422e7b5f85385d76e7b4b2d569a54&lang=DE&units=metric`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
+            }
+        });
+        if (hourlyResponse.ok) {
+            var hourlyData = await hourlyResponse.json();
+            setHourlyData(hourlyData);
+            console.log(hourlyData)
+        }
         setLoading(false);
     }
 
@@ -54,6 +67,20 @@ export const WeatherInformation = () => {
 
 
     }, [lat, lon]);
+
+    function windDirectionIcon(d) {
+        let directions = [<North />, <NorthEast />, <East />, <SouthEast />, <South />, <SouthWest />, <West />, <NorthWest />];
+
+        d += 22.5;
+
+        if (d < 0)
+            d = 360 - Math.abs(d) % 360;
+        else
+            d = d % 360;
+
+        let w = parseInt(d / 45);
+        return `${directions[w]}`;
+    }
 
     function text(d) {
         let directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
@@ -115,36 +142,71 @@ export const WeatherInformation = () => {
                     <Card elevation={4} sx={{ mt: 2 }}>
                         <CardHeader title={"Aktuelles Wetter"} subheader={data.weather[0].description} />
                         <CardContent>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell />
-                                        <TableCell align="left">Temperatur</TableCell>
-                                        <TableCell align="left">Maximal heute</TableCell>
-                                        <TableCell align="left">Minimal heute</TableCell>
-                                        <TableCell align="left">Gefühlte Temperatur</TableCell>
-                                        <TableCell align="left">Luftdruck</TableCell>
-                                        <TableCell align="left">Luftfeuchtigkeit</TableCell>
-                                        <TableCell align="left">Wind</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {
-                                        data && <>
-                                            <TableCell align="left">
-                                                <img src={`https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`} width={"40px"} height={"40px"} />
-                                            </TableCell>
-                                            <TableCell align="left">{data.main.temp} °C</TableCell>
-                                            <TableCell align="left">{data.main.temp_max} °C</TableCell>
-                                            <TableCell align="left">{data.main.temp_min} °C</TableCell>
-                                            <TableCell align="left">{data.main.feels_like} °C</TableCell>
-                                            <TableCell align="left">{data.main.pressure} hPa</TableCell>
-                                            <TableCell align="left">{data.main.humidity} %</TableCell>
-                                            <TableCell align="left">{data.wind.speed} m/s {text(data.wind.deg)}</TableCell>
-                                        </>
-                                    }
-                                </TableBody>
-                            </Table>
+                            <Grid container sx={{ overflowX: "auto" }}>
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell />
+                                            <TableCell align="left">Temperatur</TableCell>
+                                            <TableCell align="left">Maximal heute</TableCell>
+                                            <TableCell align="left">Minimal heute</TableCell>
+                                            <TableCell align="left">Gefühlte Temperatur</TableCell>
+                                            <TableCell align="left">Luftdruck</TableCell>
+                                            <TableCell align="left">Luftfeuchtigkeit</TableCell>
+                                            <TableCell align="left">Wind</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {
+                                            data && <>
+                                                <TableCell align="left">
+                                                    <img src={`https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`} width={"40px"} height={"40px"} />
+                                                </TableCell>
+                                                <TableCell align="left">{data.main.temp} °C</TableCell>
+                                                <TableCell align="left">{data.main.temp_max} °C</TableCell>
+                                                <TableCell align="left">{data.main.temp_min} °C</TableCell>
+                                                <TableCell align="left">{data.main.feels_like} °C</TableCell>
+                                                <TableCell align="left">{data.main.pressure} hPa</TableCell>
+                                                <TableCell align="left">{data.main.humidity} %</TableCell>
+                                                <TableCell align="left">{data.wind.speed} m/s {text(data.wind.deg)}</TableCell>
+                                            </>
+                                        }
+                                    </TableBody>
+                                </Table>
+                            </Grid>
+                            <CardHeader title={"Stündliche Vorhersage"} />
+                            <Grid container sx={{ overflowX: "auto", mt: 2 }}>
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell style={{ position: "sticky", left: 0, backgroundColor: "white" }}>Uhrzeit</TableCell>
+                                            {
+                                                hourlyData && hourlyData.list.map(x => <TableCell align="left">{moment(new Date(x.dt * 1000)).format("DD.MM HH:mm")} Uhr</TableCell>)
+                                            }
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row" style={{ position: "sticky", left: 0, backgroundColor: "white" }}>Temperatur</TableCell>
+                                            {
+                                                hourlyData && hourlyData.list.map(x => <TableCell align="left">{x.main.temp} °C</TableCell>)
+                                            }
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row" style={{ position: "sticky", left: 0, backgroundColor: "white" }}>Wetter</TableCell>
+                                            {
+                                                hourlyData && hourlyData.list.map(x => <TableCell align="left"><img src={`https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`} width={"40px"} height={"40px"} /></TableCell>)
+                                            }
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row" style={{ position: "sticky", left: 0, backgroundColor: "white" }}>Wind</TableCell>
+                                            {
+                                                hourlyData && hourlyData.list.map(x => <TableCell align="left">{data.wind.speed} m/s {text(data.wind.deg)}</TableCell>)
+                                            }
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            </Grid>
                         </CardContent>
                     </Card>
                 </Grid>
