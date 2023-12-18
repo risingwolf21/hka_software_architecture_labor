@@ -10,7 +10,7 @@ export class BundMiddleware implements NestMiddleware {
     secure: true,
     ws: false,
     pathRewrite: {
-      '^/bund': '/bund',
+      '^/bund': '/',
     },
   });
 

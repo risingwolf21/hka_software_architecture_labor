@@ -10,7 +10,7 @@ export class OpenWeatherProMiddleware implements NestMiddleware {
     secure: true,
     ws: false,
     pathRewrite: {
-        '^/openweatherpro': '/openweatherpro',
+        '^/openweatherpro': '/',
       },
   });
 
