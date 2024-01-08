@@ -8,6 +8,21 @@ import { North, South, SouthEast, East, West, NorthWest, NorthEast, SouthWest } 
 import moment from 'moment';
 moment.locale("de");
 
+
+export const windDirectionAsText = (d) => {
+    let directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+
+    d += 22.5;
+
+    if (d < 0)
+        d = 360 - Math.abs(d) % 360;
+    else
+        d = d % 360;
+
+    let w = parseInt(d / 45);
+    return `${directions[w]}`;
+}
+
 export const WeatherInformation = () => {
 
     const { state } = useLocation();
@@ -70,20 +85,6 @@ export const WeatherInformation = () => {
 
     function windDirectionIcon(d) {
         let directions = [<North />, <NorthEast />, <East />, <SouthEast />, <South />, <SouthWest />, <West />, <NorthWest />];
-
-        d += 22.5;
-
-        if (d < 0)
-            d = 360 - Math.abs(d) % 360;
-        else
-            d = d % 360;
-
-        let w = parseInt(d / 45);
-        return `${directions[w]}`;
-    }
-
-    function text(d) {
-        let directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 
         d += 22.5;
 
@@ -168,7 +169,7 @@ export const WeatherInformation = () => {
                                                 <TableCell align="left">{data.main.feels_like} °C</TableCell>
                                                 <TableCell align="left">{data.main.pressure} hPa</TableCell>
                                                 <TableCell align="left">{data.main.humidity} %</TableCell>
-                                                <TableCell align="left">{data.wind.speed} m/s {text(data.wind.deg)}</TableCell>
+                                                <TableCell align="left">{data.wind.speed} m/s {windDirectionAsText(data.wind.deg)}</TableCell>
                                             </>
                                         }
                                     </TableBody>
@@ -195,13 +196,13 @@ export const WeatherInformation = () => {
                                         <TableRow>
                                             <TableCell component="th" scope="row" style={{ position: "sticky", left: 0, backgroundColor: "white" }}>Wetter</TableCell>
                                             {
-                                                hourlyData && hourlyData.list.map(x => <TableCell align="left"><img src={`https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`} width={"40px"} height={"40px"} /></TableCell>)
+                                                hourlyData && hourlyData.list.map(x => <TableCell align="left"><img src={`https://openweathermap.org/img/wn/${x.weather[0].icon}@2x.png`} width={"40px"} height={"40px"} /></TableCell>)
                                             }
                                         </TableRow>
                                         <TableRow>
                                             <TableCell component="th" scope="row" style={{ position: "sticky", left: 0, backgroundColor: "white" }}>Wind</TableCell>
                                             {
-                                                hourlyData && hourlyData.list.map(x => <TableCell align="left">{data.wind.speed} m/s {text(data.wind.deg)}</TableCell>)
+                                                hourlyData && hourlyData.list.map(x => <TableCell align="left">{x.wind.speed} m/s {windDirectionAsText(x.wind.deg)}</TableCell>)
                                             }
                                         </TableRow>
                                     </TableBody>
