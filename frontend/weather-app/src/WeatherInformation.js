@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { AppBar, Card, CardContent, CardHeader, CardMedia, CircularProgress, Divider, Grid, IconButton, LinearProgress, List, ListItem, ListItemAvatar, ListItemSecondaryAction, ListItemText, Table, TableBody, TableCell, TableHead, TableRow, Toolbar, Typography } from "@mui/material";
+import { AppBar, Card, CardContent, CardHeader, CardMedia, CircularProgress, Box, Grid, IconButton, LinearProgress, List, ListItem, ListItemAvatar, ListItemSecondaryAction, ListItemText, Table, TableBody, TableCell, TableHead, TableRow, Toolbar, Typography } from "@mui/material";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import "moment/locale/de";
+import { format } from "date-fns";
 import { North, South, SouthEast, East, West, NorthWest, NorthEast, SouthWest } from '@mui/icons-material';
 import moment from 'moment';
 moment.locale("de");
@@ -155,6 +156,8 @@ export const WeatherInformation = () => {
                                             <TableCell align="left">Luftdruck</TableCell>
                                             <TableCell align="left">Luftfeuchtigkeit</TableCell>
                                             <TableCell align="left">Wind</TableCell>
+                                            <TableCell align="left">Sonnenaufgang</TableCell>
+                                            <TableCell align="left">Sonnenuntergang</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -170,6 +173,8 @@ export const WeatherInformation = () => {
                                                 <TableCell align="left">{data.main.pressure} hPa</TableCell>
                                                 <TableCell align="left">{data.main.humidity} %</TableCell>
                                                 <TableCell align="left">{data.wind.speed} m/s {windDirectionAsText(data.wind.deg)}</TableCell>
+                                                <TableCell align="left">{format(new Date(data.sys.sunrise * 1000), "HH:mm")}</TableCell>
+                                                <TableCell align="left">{format(new Date(data.sys.sunset * 1000), "HH:mm")}</TableCell>
                                             </>
                                         }
                                     </TableBody>

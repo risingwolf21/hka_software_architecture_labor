@@ -1,28 +1,58 @@
-import { AppBar, CardContent, Button, Grid, Card, CardActions, CardHeader, ListItem, ListItemAvatar, ListItemText, Typography, MenuItem, Paper, Toolbar } from "@mui/material"
+import { AppBar, CardContent, Button, Grid, Card, CardActions, CardHeader, ListItem, ListItemAvatar, ListItemText, Typography, IconButton, ListItemSecondaryAction, Toolbar, List, ListItemButton } from "@mui/material"
 import { useEffect, useState } from "react";
-import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import { useSelector } from "react-redux";
 import { Search, SearchIconWrapper, StyledInputBase } from "./SearchBar";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
 import { WeatherInformation, windDirectionAsText } from "./WeatherInformation";
-import { Thermostat } from "@mui/icons-material";
+import { Place, Remove, Star, StarOutline, StartOutlined, Thermostat } from "@mui/icons-material";
 
-const MapEvents = ({ selectPosition }) => {
+const MapEvents = ({ selectPosition, position }) => {
 
-    const [pos, setPos] = useState(null);
+    const map = useMap();
+
+    useEffect(() => {
+        map.locate().on("locationfound", function (e) {
+            if (!(position?.lat && position?.lon)) {
+                selectPosition(e.latlng.lat, e.latlng.lng);
+                map.flyTo(e.latlng, map.getZoom());
+            }
+        });
+    }, [map]);
 
     useMapEvents({
         click(e) {
-            setPos({ lat: e.latlng.lat, lon: e.latlng.lng })
             selectPosition(e.latlng.lat, e.latlng.lng);
         },
     });
 
-    return pos ? <Marker position={[pos.lat, pos.lon]} /> : null
+    return (position?.lat && position?.lon) ? <Marker position={[position.lat, position.lon]} /> : null
 }
 
-const CurrentWeatherInformation = ({ lat, lon }) => {
+const FavoriteList = ({ favorites, removeFavorite, selectFavorite }) => {
+
+    return <Card sx={{ width: "300px", mt: 2 }}>
+        <CardHeader title={"Favoriten"} />
+        <List sx={{ overflowY: "scroll", overflow: "hidden", height: "100%" }}>
+            {
+                favorites.map(x => <ListItemButton dense onClick={() => selectFavorite(x.lat, x.lon)}>
+                    <ListItemAvatar>
+                        <Place />
+                    </ListItemAvatar>
+                    <ListItemText primary={x.name} secondary={x.lat + ", " + x.lon} />
+                    <ListItemSecondaryAction>
+                        <IconButton onClick={() => removeFavorite(x)}>
+                            <Remove />
+                        </IconButton>
+                    </ListItemSecondaryAction>
+                </ListItemButton>)
+            }
+        </List>
+    </Card>
+}
+
+const CurrentWeatherInformation = ({ lat, lon, toggleFavorite, isFavorite }) => {
 
     const [data, setData] = useState();
     const navigate = useNavigate();
@@ -47,52 +77,55 @@ const CurrentWeatherInformation = ({ lat, lon }) => {
         loadData(lat, lon);
     }, [lat, lon]);
 
-    if (!data)
-        return;
+    return <Card sx={{ width: "300px" }}>
+        <CardHeader title={data ? data.name : "Keine Daten vorhanden"} action={
+            <IconButton aria-label="settings" onClick={() => data ? toggleFavorite({ name: data.name, lat: lat, lon: lon }) : null}>
+                {
+                    data && isFavorite(lat, lon, data.name) ? <Star /> : <StarOutline />
+                }
+            </IconButton>
+        } />
+        <ListItem dense>
+            <ListItemAvatar>
+                {
+                    data && <img src={`https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`} width={"40px"} height={"40px"} />
+                }
+            </ListItemAvatar>
+            <ListItemText primary={data ? data.weather[0].description : "Keine Daten vorhanden"} />
+        </ListItem>
+        <ListItem dense>
+            <ListItemAvatar>
+                <Thermostat />
+            </ListItemAvatar>
+            <ListItemText primary={data ? data.main.temp + " °C" : "Keine Daten vorhanden"} secondary={"Tatsächliche Temperatur"} />
+        </ListItem>
+        <ListItem dense>
+            <ListItemAvatar>
+                <Thermostat />
+            </ListItemAvatar>
+            <ListItemText primary={data ? data.main.feels_like + " °C" : "Keine Daten vorhanden"} secondary={"Gefühlte Temperatur"} />
+        </ListItem>
+        <ListItem dense>
+            <ListItemAvatar>
+            </ListItemAvatar>
+            <ListItemText primary={data ? data.main.humidity + " %" : "Keine Daten vorhanden"} secondary={"Luftfeuchtigkeit"} />
+        </ListItem>
 
-    return <Grid sx={{ position: "absolute", right: 0, top: "64px", width: "300px", m: 2, zIndex: 9999 }}>
-        <Card sx={{ width: "300px" }}>
-            <CardHeader title={data.name} />
-            <ListItem dense>
-                <ListItemAvatar>
-                    <img src={`https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`} width={"40px"} height={"40px"} />
-                </ListItemAvatar>
-                <ListItemText primary={data.weather[0].description} />
-            </ListItem>
-            <ListItem dense>
-                <ListItemAvatar>
-                    <Thermostat />
-                </ListItemAvatar>
-                <ListItemText primary={data.main.temp + " °C"} secondary={"Tatsächliche Temperatur"} />
-            </ListItem>
-            <ListItem dense>
-                <ListItemAvatar>
-                    <Thermostat />
-                </ListItemAvatar>
-                <ListItemText primary={data.main.feels_like + " °C"} secondary={"Gefühlte Temperatur"} />
-            </ListItem>
-            <ListItem dense>
-                <ListItemAvatar>
-                </ListItemAvatar>
-                <ListItemText primary={data.main.humidity + " %"} secondary={"Luftfeuchtigkeit"} />
-            </ListItem>
+        <ListItem dense>
+            <ListItemAvatar>
+                <Typography>{data ? windDirectionAsText(data.wind.deg) : "??"}</Typography>
+            </ListItemAvatar>
+            <ListItemText primary={data ? data.wind.speed + " m/s" : "Kein Daten vorhanden"} secondary={"Windgeschwindigkeit"} />
+        </ListItem>
+        <CardContent>
 
-            <ListItem dense>
-                <ListItemAvatar>
-                    <Typography>{windDirectionAsText(data.wind.deg)}</Typography>
-                </ListItemAvatar>
-                <ListItemText primary={data.wind.speed + " m/s"} secondary={"Windgeschwindigkeit"} />
-            </ListItem>
-            <CardContent>
+        </CardContent>
 
-            </CardContent>
+        <CardActions>
+            <Button variant="contained" onClick={() => data ? navigate("/station", { state: { lat, lon } }) : null}>Mehr Informationen</Button>
+        </CardActions>
 
-            <CardActions>
-                <Button variant="contained" onClick={() => navigate("/station", { state: { lat, lon } })}>Mehr Informationen</Button>
-            </CardActions>
-
-        </Card>
-    </Grid>
+    </Card>
 }
 
 
@@ -101,6 +134,8 @@ export const Map = () => {
     const [searchString, setSearchString] = useState("");
     const [selectedPos, setSelectedPos] = useState([49.0226481, 8.416547971872856]);
     const navigate = useNavigate();
+    const [favorites, setFavorites] = useState(localStorage.getItem("favorites")?.split(";").map(x => JSON.parse(x)) ?? []);
+
 
     const [selectedStation, setSelectedStation] = useState({ lat: null, lon: null });
 
@@ -108,6 +143,15 @@ export const Map = () => {
         if (e.keyCode === 13) {
 
         }
+    }
+
+    const toggleFavorite = (item) => {
+        if (favorites.some(x => x.lat === item.lat && x.lon === item.lon && item.name === x.name)) {
+            setFavorites(favorites.filter(x => !(x.lat === item.lat && x.lon === item.lon && item.name === x.name)))
+        } else {
+            setFavorites([...favorites, item])
+        }
+        localStorage.setItem("favorites", favorites.map(x => JSON.stringify(x)).join(";"));
     }
 
     return <Grid sx={{ height: "100vh", width: "100vw", overflow: "hidden" }}>
@@ -131,12 +175,15 @@ export const Map = () => {
             center={selectedPos}
             zoom={10}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            <MapEvents selectPosition={(lat, lon) => {
+            <MapEvents position={selectedStation} selectPosition={(lat, lon) => {
                 //navigate("/station", { state: { lat, lon } })
                 setSelectedStation({ lat, lon });
             }} />
         </MapContainer>
-        <CurrentWeatherInformation lat={selectedStation.lat} lon={selectedStation.lon} />
+        <Grid sx={{ position: "absolute", right: 0, top: "64px", bottom: 0, width: "300px", m: 2, zIndex: 9999, overflow: "hidden" }}>
+            <CurrentWeatherInformation lat={selectedStation.lat} lon={selectedStation.lon} toggleFavorite={toggleFavorite} isFavorite={(lat, lon, name) => favorites.some(x => x.lat === lat && x.lon === lon && name === x.name)} />
+            <FavoriteList favorites={favorites} removeFavorite={toggleFavorite} selectFavorite={(lat, lon) => setSelectedStation({ lat, lon })} />
+        </Grid>
 
     </Grid>
 }
